@@ -21,6 +21,10 @@ public class ProcessTaskVo {
 
 	private Date endTime;
 
+	private String description;
+
+	private String formData;
+
 	public ProcessTaskVo() {
 		super();
 	}
@@ -33,6 +37,8 @@ public class ProcessTaskVo {
 		this.owner = task.getOwner();
 		this.processInstanceId = task.getProcessInstanceId();
 		this.category = task.getCategory();
+		this.description = task.getDescription();
+		this.formData = task.getFormKey();
 	}
 
 	public ProcessTaskVo(HistoricTaskInstance task) {
@@ -44,6 +50,8 @@ public class ProcessTaskVo {
 		this.owner = task.getOwner();
 		this.processInstanceId = task.getProcessInstanceId();
 		this.category = task.getCategory();
+		this.description = task.getDescription();
+		this.formData = task.getFormKey();
 	}
 
 	public String getTaskID() {
@@ -102,12 +110,29 @@ public class ProcessTaskVo {
 		this.endTime = endTime;
 	}
 
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public String getFormData() {
+		return formData;
+	}
+
+	public void setFormData(String formData) {
+		this.formData = formData;
+	}
+
 	@Override
 	public String toString() {
 		return "ProcessTaskVo [taskID=" + taskID + ", taskName=" + taskName
 				+ ", assignee=" + assignee + ", owner=" + owner
 				+ ", processInstanceId=" + processInstanceId + ", category="
-				+ category + ", endTime=" + endTime + "]";
+				+ category + ", endTime=" + endTime + ", description="
+				+ description + ", formData=" + formData + "]";
 	}
 
 }

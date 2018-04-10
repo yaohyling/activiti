@@ -1,8 +1,12 @@
 package com.crledu.activiti.controller;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.Resource;
 
@@ -116,8 +120,7 @@ public class ActivitiProcessController {
 	@RequestMapping("def/list")
 	public Response<List<ProcessDefinitionVo>> findDeploy(
 			ProcessDefSelector selector) {
-		List<ProcessDefinitionVo> list = processDefService
-				.findDeployBySelector(selector);
+		List<ProcessDefinitionVo> list = processDefService.findDeployBySelector(selector);
 		return new Response<List<ProcessDefinitionVo>>().success(list);
 	}
 
@@ -145,6 +148,17 @@ public class ActivitiProcessController {
 			return new Response<ProcessInstancessVo>().success(instanceVo);
 		}
 		return new Response<ProcessInstancessVo>().failure("流程启动失败");
+	}
+	
+	@RequestMapping("instance/running")
+	public Response<List<ProcessInstancessVo>> findRunningInstance(String[] keyList) {
+		List<String> listStr = new ArrayList<>();
+		if (keyList != null && keyList.length >0) {
+			listStr = Arrays.asList(keyList);
+		}
+		Set<String> keys = new HashSet<String>(listStr);
+		List<ProcessInstancessVo> list = processInsService.findRunningInstance(keys);
+		return new Response<List<ProcessInstancessVo>>().success(list);
 	}
 
 	/**

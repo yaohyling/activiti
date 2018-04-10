@@ -1,6 +1,8 @@
 package com.crledu.activiti.service.processins;
 
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.crledu.activiti.domain.ProcessInstancessVo;
 
@@ -22,5 +24,7 @@ public interface ProcessInstanceService {
 	 *
 	 */
 	ProcessInstancessVo startInstanceByKey(String proDefKey, Map<String, Object> variables);
+
+	List<ProcessInstancessVo> findRunningInstance(Set<String> processDefinitionKeys);
 
 }

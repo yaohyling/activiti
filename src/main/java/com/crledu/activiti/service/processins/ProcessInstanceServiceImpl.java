@@ -1,13 +1,17 @@
 package com.crledu.activiti.service.processins;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.Resource;
 
 import org.activiti.engine.ProcessEngine;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.runtime.ProcessInstance;
+import org.activiti.engine.runtime.ProcessInstanceQuery;
 import org.apache.commons.io.FileSystemUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,10 +31,15 @@ public class ProcessInstanceServiceImpl implements ProcessInstanceService {
 	@Resource
 	private ProcessEngine processEngine;
 	
+	/**
+	 * Activiti 运行时service
+	 */
+	@Resource
+	private RuntimeService runtimeService;
+	
 	@Override
 	public ProcessInstancessVo startInstanceByKey(String proDefKey, Map<String, Object> variables) {
 		try {
-			RuntimeService runtimeService = processEngine.getRuntimeService();
 			ProcessInstance instance = runtimeService.startProcessInstanceByKey(proDefKey, variables);
 			ProcessInstancessVo instanceVo = new ProcessInstancessVo(instance);
 			return instanceVo;
@@ -38,6 +47,21 @@ public class ProcessInstanceServiceImpl implements ProcessInstanceService {
 			LOGGER.error("启动流程实例失败", e);
 			return null;
 		}
+	}
+
+	@Override
+	public List<ProcessInstancessVo> findRunningInstance(Set<String> processDefinitionKeys) {
+		List<ProcessInstancessVo> instanceVoList = new ArrayList<>();
+		ProcessInstanceQuery instanceQuery = runtimeService.createProcessInstanceQuery();
+		if (processDefinitionKeys != null && !processDefinitionKeys.isEmpty()) {
+			instanceQuery = instanceQuery.processDefinitionKeys(processDefinitionKeys);
+		}
+		List<ProcessInstance> list = instanceQuery.list();
+		for (ProcessInstance processInstance : list) {
+			ProcessInstancessVo instanceVo = new ProcessInstancessVo(processInstance);
+			instanceVoList.add(instanceVo);
+		}
+		return instanceVoList;
 	}
 
 }
