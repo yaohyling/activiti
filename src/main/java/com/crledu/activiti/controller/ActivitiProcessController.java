@@ -37,8 +37,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @SuppressWarnings("unchecked")
 public class ActivitiProcessController {
 
-	protected static final Logger LOGGER = LoggerFactory
-			.getLogger(ActivitiProcessController.class);
+	protected static final Logger LOGGER = LoggerFactory.getLogger(ActivitiProcessController.class);
 
 	@Resource
 	private ProcessEngine processEngine;
