@@ -23,9 +23,9 @@ import org.activiti.engine.task.Task;
 import org.activiti.engine.task.TaskQuery;
 import org.springframework.stereotype.Service;
 
-import com.crledu.activiti.constanct.ActivitiType;
 import com.crledu.activiti.domain.ProcessTaskSelector;
 import com.crledu.activiti.domain.ProcessTaskVo;
+import com.crledu.activiti.system.util.ActivitiType;
 import com.crledu.activiti.system.util.RejectActivityCMD;
 import com.crledu.activiti.system.util.RejectTaskCMD;
 
