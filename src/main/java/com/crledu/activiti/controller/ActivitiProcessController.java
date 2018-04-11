@@ -46,7 +46,6 @@ public class ActivitiProcessController {
 	@Resource
 	private ProcessEngine processEngine;
 
-
 	@Resource
 	private ProcessDefinitionService processDefService;
 
@@ -150,6 +149,21 @@ public class ActivitiProcessController {
 		return new Response<ProcessInstancessVo>().failure("流程启动失败");
 	}
 	
+	/**
+	 * 
+	 ******************************************
+	 * @Function: 获取已运行实例
+	 * @param keyList 流程定义key数组
+	 * @return
+	 * Response<List<ProcessInstancessVo>>
+	 ******************************************
+	 * @CreatedBy: yhy on 2018年4月11日下午5:51:07
+	 ******************************************
+	 * @ModifiedBy: [name] on [time] 
+	 * @Description:
+	 ******************************************
+	 *
+	 */
 	@RequestMapping("instance/running")
 	public Response<List<ProcessInstancessVo>> findRunningInstance(String[] keyList) {
 		List<String> listStr = new ArrayList<>();
@@ -160,7 +174,7 @@ public class ActivitiProcessController {
 		List<ProcessInstancessVo> list = processInsService.findRunningInstance(keys);
 		return new Response<List<ProcessInstancessVo>>().success(list);
 	}
-
+	
 	/**
 	 * 
 	 ******************************************
@@ -180,6 +194,7 @@ public class ActivitiProcessController {
 		List<ProcessTaskVo> taskVoList = processTaskService.findToDoTasks(selector);
 		return new Response<List<ProcessTaskVo>>().success(taskVoList);
 	}
+	
 	
 	/**
 	 * 
@@ -201,6 +216,7 @@ public class ActivitiProcessController {
 		List<ProcessTaskVo> taskVoList = processTaskService.findFinishTasks(selector);
 		return new Response<List<ProcessTaskVo>>().success(taskVoList);
 	}
+	
 	
 	/**
 	 * 
@@ -225,6 +241,8 @@ public class ActivitiProcessController {
 		}
 		return new Response<String>().failure("流程出错");
 	}
+	
+	
 	/**
 	 * 
 	 ******************************************
@@ -242,15 +260,44 @@ public class ActivitiProcessController {
 	 */
 	@RequestMapping(value = "task/{id}/complete", method = RequestMethod.POST)
 	public Response<String> completeTask(@PathVariable("id") String taskId, ProcessTaskSelector taskCondition) {
-		boolean ret = processTaskService.completeTask(taskId, taskCondition);
-		if (ret) {
-			return new Response<String>().success();
+		Map<String, Object> processVariables = new HashMap<String, Object>();  //流程变量
+		Map<String, Object> taskLocalVariables = new HashMap<String, Object>(); // 任务变量
+		taskLocalVariables.put("userId", taskCondition.getAssignee());
+		taskLocalVariables.put("currentAccount", taskCondition.getCurrentAccount());
+		taskLocalVariables.put("group", taskCondition.getGroup());
+		taskLocalVariables.put("results", "1");
+		String nextTaskId = processTaskService.completeTaskByTaskID(taskId, processVariables, taskLocalVariables);
+		if (nextTaskId != null) {
+			return new Response<String>().success(nextTaskId);
 		}
-		return new Response<String>().failure("流程出错");
+		return new Response<String>().failure("任务完成出错");
+	}
+	
+	/**
+	 * 
+	 ******************************************
+	 * @Function: 任一历史任务的驳回
+	 * @param currentTaskId 当前任务ID
+	 * @param destinationTaskId 目标任务ID
+	 * @param reason 驳回原因
+	 * @return
+	 * Response<String>
+	 ******************************************
+	 * @CreatedBy: yhy on 2018年4月11日下午5:40:11
+	 ******************************************
+	 * @ModifiedBy: [name] on [time] 
+	 * @Description:
+	 ******************************************
+	 *
+	 */
+	@RequestMapping(value = "task/{id}/reject", method = RequestMethod.POST)
+	public Response<String> rejectTask(@PathVariable("id") String currentTaskId,String destinationTaskId,String reason) {
+		String nextTaskId = processTaskService.rejectTask(currentTaskId, destinationTaskId, reason);
+		if (nextTaskId != null) {
+			return new Response<String>().success(nextTaskId);
+		}
+		return new Response<String>().failure("任务驳回出错");
 	}
 
-	@RequestMapping(value = "task/{id}/back", method = RequestMethod.GET)
-	public void back0Task(@PathVariable("id") String taskId) {
-	}
 
 }
