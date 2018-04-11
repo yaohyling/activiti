@@ -23,7 +23,7 @@ import org.activiti.engine.task.Task;
 import org.activiti.engine.task.TaskQuery;
 import org.springframework.stereotype.Service;
 
-import com.crledu.activiti.constanct.ActivitiConstanct;
+import com.crledu.activiti.constanct.ActivitiType;
 import com.crledu.activiti.domain.ProcessTaskSelector;
 import com.crledu.activiti.domain.ProcessTaskVo;
 import com.crledu.activiti.system.util.RejectActivityCMD;
@@ -236,8 +236,8 @@ public class ProcessTaskServiceImpl implements ProcessTaskService{
 					oldHisActivityList.add((HistoricActivityInstanceEntity) historicActivityInstance);
 				}
 			} else {
-	              // ActivitiConstanct.START_EVENT = "startEvent" --> 定义的常量，表示是启动节点
-                if (historicActivityInstance.getActivityType().equals(ActivitiConstanct.START_EVENT)) {
+	              // 定义的常量，表示是开始节点
+                if (historicActivityInstance.getActivityType().equals(ActivitiType.START_EVENT)) {
                 	oldHisActivityList.add((HistoricActivityInstanceEntity) historicActivityInstance);
                 }
             }
@@ -269,15 +269,15 @@ public class ProcessTaskServiceImpl implements ProcessTaskService{
         Map<String, Object> taskLocalVariables = hisCurrentTask.getTaskLocalVariables();
         // 目标任务中的任务变量
         Map<String, Object> processVariables = hisDestTask.getProcessVariables();
-        processVariables.put(ActivitiConstanct.SKIP_EXPRESSION, false);
-        taskLocalVariables.put(ActivitiConstanct.SKIP_EXPRESSION, false);
-        taskLocalVariables.put(ActivitiConstanct.REJECT_REASON, reason);
+        processVariables.put(ActivitiType.SKIP_EXPRESSION, false);
+        taskLocalVariables.put(ActivitiType.SKIP_EXPRESSION, false);
+        taskLocalVariables.put(ActivitiType.REJECT_REASON, reason);
         String nextTaskId = this.completeTaskByTaskID(currentTaskId, processVariables, taskLocalVariables);
         // 清空临时转向信息
         currentActivity.getOutgoingTransitions().clear();
         // 恢复原来的走向
         currentActivity.getOutgoingTransitions().add(pvmTransition);
-        // 删除历史任务  ---> 虽然不太地道，但是现在也只想到了这个方法。 historyService只提供了这个方法。
+        // 删除历史任务
         for (HistoricTaskInstance historicTaskInstance : delHisTaskList) {
             historyService.deleteHistoricTaskInstance(historicTaskInstance.getId());
         }
