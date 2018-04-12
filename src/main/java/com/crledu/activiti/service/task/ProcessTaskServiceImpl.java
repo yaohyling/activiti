@@ -19,6 +19,7 @@ import org.activiti.engine.impl.persistence.entity.HistoricActivityInstanceEntit
 import org.activiti.engine.impl.persistence.entity.ProcessDefinitionEntity;
 import org.activiti.engine.impl.pvm.PvmTransition;
 import org.activiti.engine.impl.pvm.process.ActivityImpl;
+import org.activiti.engine.task.IdentityLink;
 import org.activiti.engine.task.Task;
 import org.activiti.engine.task.TaskQuery;
 import org.springframework.stereotype.Service;
@@ -28,6 +29,7 @@ import com.crledu.activiti.domain.ProcessTaskVo;
 import com.crledu.activiti.system.util.ActivitiType;
 import com.crledu.activiti.system.util.RejectActivityCMD;
 import com.crledu.activiti.system.util.RejectTaskCMD;
+import com.crledu.system.response.page.PageResponse;
 
 
 /**
@@ -65,7 +67,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService{
 	private RepositoryService repositoryService;
 	
 	@Override
-	public List<ProcessTaskVo> findToDoTasks(ProcessTaskSelector selector) {
+	public PageResponse<ProcessTaskVo> findToDoTasks(ProcessTaskSelector selector) {
 //		/* 通过注入的方式获取*/
 //		TaskService taskService = processEngine.getTaskService();  
 		TaskQuery taskQuery = taskService.createTaskQuery();  // 获取任务查询
@@ -83,13 +85,15 @@ public class ProcessTaskServiceImpl implements ProcessTaskService{
 			} else if (condition != null && !condition.trim().isEmpty()) {
 				taskQuery = taskQuery.taskCandidateOrAssigned(condition); //添加查询条件: 任务参与者或直接委派人
 			}
-			int pageSize = selector.getPageSize(); // 每页显示条数
-			int pageNum = selector.getPageNum(); // 页码
-			if (pageSize != 0 ) {  // 判断是否分页
-				if (pageNum == 0) { //页码默认为1
+			if (selector.getPageSize() != null && selector.getPageSize() != 0 ) {  // 判断是否分页
+				int pageSize = selector.getPageSize(); // 每页显示条数
+				int pageNum = 0; // 页码
+				if (selector.getPageNum() == null || selector.getPageNum() == 0) { //页码默认为1
 					pageNum = 1;
+				}else{
+					pageNum = selector.getPageNum();
 				}
-				taskList = taskQuery.listPage((pageNum - 1)*pageSize, pageNum*pageSize - 1); // 分页查询
+				taskList  = taskQuery.listPage((pageNum - 1)*pageSize, pageSize); // 分页查询
 			}else{
 				taskList = taskQuery.list(); // 不分页
 			}
@@ -98,14 +102,25 @@ public class ProcessTaskServiceImpl implements ProcessTaskService{
 		}
 		List<ProcessTaskVo> taskVoList = new ArrayList<>(); 
 		for (Task task : taskList) {  // 转化为值对象
+			if (task.getAssignee() == null || task.getAssignee().trim().isEmpty()) {
+				List<IdentityLink> candidate = taskService.getIdentityLinksForTask(task.getId());
+				StringBuilder sb = new StringBuilder();
+				for (IdentityLink identityLink : candidate) {
+					if (identityLink.getUserId() != null) {
+						sb.append(identityLink.getUserId()+",");
+					}
+				}
+				task.setAssignee(sb.toString());
+			}
 			ProcessTaskVo taskVo = new ProcessTaskVo(task);
 			taskVoList.add(taskVo);
 		}
-		return taskVoList;
+		PageResponse<ProcessTaskVo> pageResponse = new PageResponse<ProcessTaskVo>(taskVoList, taskQuery.count());
+		return pageResponse;
 	}
 
 	@Override
-	public List<ProcessTaskVo> findFinishTasks(ProcessTaskSelector selector) {
+	public PageResponse<ProcessTaskVo> findFinishTasks(ProcessTaskSelector selector) {
 		HistoryService historyService = processEngine.getHistoryService();
 		HistoricTaskInstanceQuery hisTaskQuery = historyService.createHistoricTaskInstanceQuery().finished();  // 获取历史任务query，并添加已办条件
 		List<HistoricTaskInstance> taskList = new ArrayList<>();
@@ -122,13 +137,16 @@ public class ProcessTaskServiceImpl implements ProcessTaskService{
 			} else if (condition != null && !condition.trim().isEmpty()) {
 				hisTaskQuery = hisTaskQuery.taskAssignee(condition);  //添加查询条件: 任务直接委派人
 			}
-			int pageSize = selector.getPageSize(); // 每页显示条数
-			int pageNum = selector.getPageNum(); // 页码
-			if (pageSize != 0 ) {  // 判断是否分页
-				if (pageNum == 0) { //页码默认为1
+			if (selector.getPageSize() != null && selector.getPageSize() != 0 ) {  // 判断是否分页
+				int pageSize = selector.getPageSize(); // 每页显示条数
+				int pageNum = 0; // 页码
+				if (selector.getPageNum() == null || selector.getPageNum() == 0) { //页码默认为1
 					pageNum = 1;
+				}else{
+					pageNum = selector.getPageNum();
 				}
-				taskList  = hisTaskQuery.listPage((pageNum - 1)*pageSize, pageNum*pageSize - 1); // 分页查询
+					
+				taskList  = hisTaskQuery.listPage((pageNum - 1)*pageSize, pageSize); // 分页查询
 			}else{
 				taskList = hisTaskQuery.list(); // 不分页
 			}
@@ -140,7 +158,8 @@ public class ProcessTaskServiceImpl implements ProcessTaskService{
 			ProcessTaskVo taskVo = new ProcessTaskVo(historicTaskInstance);
 			taskVoList.add(taskVo);
 		}
-		return taskVoList;
+		PageResponse<ProcessTaskVo> pageResponse = new PageResponse<ProcessTaskVo>(taskVoList, hisTaskQuery.count());
+		return pageResponse;
 	}
 
 	@Override

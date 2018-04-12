@@ -33,6 +33,7 @@ import com.crledu.activiti.service.processdef.ProcessDefinitionService;
 import com.crledu.activiti.service.processins.ProcessInstanceService;
 import com.crledu.activiti.service.task.ProcessTaskService;
 import com.crledu.system.response.Response;
+import com.crledu.system.response.page.PageResponse;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -190,9 +191,9 @@ public class ActivitiProcessController {
 	 *
 	 */
 	@RequestMapping("task/todo/list")
-	public Response<List<ProcessTaskVo>> findToDoTasks(ProcessTaskSelector selector) {
-		List<ProcessTaskVo> taskVoList = processTaskService.findToDoTasks(selector);
-		return new Response<List<ProcessTaskVo>>().success(taskVoList);
+	public Response<PageResponse<ProcessTaskVo>> findToDoTasks(ProcessTaskSelector selector) {
+		PageResponse<ProcessTaskVo> taskVoList = processTaskService.findToDoTasks(selector);
+		return new Response<PageResponse<ProcessTaskVo>>().success(taskVoList);
 	}
 	
 	
@@ -212,9 +213,9 @@ public class ActivitiProcessController {
 	 *
 	 */
 	@RequestMapping("task/finish/list")
-	public Response<List<ProcessTaskVo>> findFinishTasks(ProcessTaskSelector selector) {
-		List<ProcessTaskVo> taskVoList = processTaskService.findFinishTasks(selector);
-		return new Response<List<ProcessTaskVo>>().success(taskVoList);
+	public Response<PageResponse<ProcessTaskVo>> findFinishTasks(ProcessTaskSelector selector) {
+		PageResponse<ProcessTaskVo> taskVoList = processTaskService.findFinishTasks(selector);
+		return new Response<PageResponse<ProcessTaskVo>>().success(taskVoList);
 	}
 	
 	

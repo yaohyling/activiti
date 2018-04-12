@@ -1,6 +1,8 @@
 package com.crledu.activiti.domain;
 
-public class ProcessTaskSelector {
+import com.crledu.system.response.page.PageInfo;
+
+public class ProcessTaskSelector extends PageInfo {
 	/**
 	 * 当前登录账号
 	 */
@@ -18,16 +20,6 @@ public class ProcessTaskSelector {
 	 * 角色
 	 */
 	private String group;
-	
-	/**
-	 * 每页显示条数
-	 */
-	private int pageSize;
-	
-	/**
-	 * 页码
-	 */
-	private int pageNum;
 
 	public ProcessTaskSelector() {
 		super();
@@ -71,28 +63,11 @@ public class ProcessTaskSelector {
 		this.group = group;
 	}
 
-	public int getPageSize() {
-		return pageSize;
-	}
-
-	public void setPageSize(int pageSize) {
-		this.pageSize = pageSize;
-	}
-
-	public int getPageNum() {
-		return pageNum;
-	}
-
-	public void setPageNum(int pageNum) {
-		this.pageNum = pageNum;
-	}
-
 	@Override
 	public String toString() {
 		return "ProcessTaskSelector [currentAccount=" + currentAccount
 				+ ", processInstanceId=" + processInstanceId + ", assignee="
-				+ assignee + ", group=" + group + ", pageSize=" + pageSize
-				+ ", pageNum=" + pageNum + "]";
+				+ assignee + ", group=" + group + "]";
 	}
 
 }

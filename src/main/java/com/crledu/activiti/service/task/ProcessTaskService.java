@@ -5,12 +5,13 @@ import java.util.Map;
 
 import com.crledu.activiti.domain.ProcessTaskSelector;
 import com.crledu.activiti.domain.ProcessTaskVo;
+import com.crledu.system.response.page.PageResponse;
 
 public interface ProcessTaskService {
 
-	List<ProcessTaskVo> findToDoTasks(ProcessTaskSelector selector);
+	PageResponse<ProcessTaskVo> findToDoTasks(ProcessTaskSelector selector);
 
-	List<ProcessTaskVo> findFinishTasks(ProcessTaskSelector selector);
+	PageResponse<ProcessTaskVo> findFinishTasks(ProcessTaskSelector selector);
 	
 	boolean turnToDoTask(String taskId, String userId);
 

@@ -19,16 +19,16 @@ import java.util.List;
 *
  */
 public class PageResponse<E> implements Serializable {
-
+	
+	private Long total;
+	
 	private List<E> rows;
-
-	private Integer total;
 
 	public PageResponse() {
 		super();
 	}
 
-	public PageResponse(List<E> rows, Integer total) {
+	public PageResponse(List<E> rows, Long total) {
 		super();
 		this.rows = rows;
 		this.total = total;
@@ -42,11 +42,11 @@ public class PageResponse<E> implements Serializable {
 		this.rows = rows;
 	}
 
-	public Integer getTotal() {
+	public Long getTotal() {
 		return total;
 	}
 
-	public void setTotal(Integer total) {
+	public void setTotal(Long total) {
 		this.total = total;
 	}
 
