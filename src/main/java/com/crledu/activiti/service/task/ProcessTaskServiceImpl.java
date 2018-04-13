@@ -195,19 +195,49 @@ public class ProcessTaskServiceImpl implements ProcessTaskService{
 	}
 
 	@Override
-	public ProcessTaskVo completeTaskByTaskID(String currentTaskID, Map<String, Object> processVariables, Map<String, Object> taskLocalVariables) {
+	public List<ProcessTaskVo> completeTaskByTaskID(String currentTaskID, Map<String, Object> processVariables, Map<String, Object> taskLocalVariables) {
 		Task task = taskService.createTaskQuery().taskId(currentTaskID).singleResult(); // 获取当前任务
 		if (task.getAssignee() == null || task.getAssignee().trim().isEmpty()) { // 判断任务是否有直接委派人
 			taskService.setAssignee(currentTaskID, "yhy"); // taskLocalVariables.get("currentAccount");，否则添加当前登录账号为直接委派人
 		}
 		taskService.complete(currentTaskID, taskLocalVariables); // 通过任务ID，完成任务
-		Task nextTask = taskService.createTaskQuery().processInstanceId(task.getProcessInstanceId()).singleResult(); // 获取当前任务
-		ProcessTaskVo taskVo = new ProcessTaskVo(nextTask);
-		return taskVo;
+		List<Task> nextTask = taskService.createTaskQuery().processInstanceId(task.getProcessInstanceId()).list(); // 获取当前任务
+		List<ProcessTaskVo> taskVoList = new ArrayList<>();
+		for (Task taskNext : nextTask) {
+			ProcessTaskVo taskVo = new ProcessTaskVo(taskNext);
+			taskVoList.add(taskVo);
+		}
+		
+		return taskVoList;
 	}
-
+	
+	public boolean isPower(String currentTaskID, Map<String, Object> taskLocalVariables){
+		List<IdentityLink> listPower = taskService.getIdentityLinksForTask(currentTaskID); // 获取
+		String currentAccount = (String) taskLocalVariables.get("currentAccount"); //当前账号
+		String group = (String) taskLocalVariables.get("group");  //所属组织code
+		for (IdentityLink identityLink : listPower) {
+			String processGroup = identityLink.getGroupId();
+			if (processGroup != null && processGroup.trim().isEmpty()) {
+				if (processGroup.equals(group)) {
+					return true;
+				}else {
+					return false;
+				}
+			}
+			String assignee = identityLink.getUserId();
+			if (assignee != null && assignee.trim().isEmpty()) {
+				if (assignee.equals(currentAccount)) {
+					return true;
+				}else {
+					return false;
+				}
+			}
+		}
+		return false;
+	}
+	
 	@Override
-	public ProcessTaskVo rejectTask(String currentTaskId, String destinationTaskId, String reason) {
+	public List<ProcessTaskVo> rejectTask(String currentTaskId, String destinationTaskId, String reason) {
 		// 获取目标任务信息
 		HistoricTaskInstance hisDestTask = historyService
 				.createHistoricTaskInstanceQuery()
@@ -292,7 +322,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService{
         processVariables.put(ActivitiType.SKIP_EXPRESSION, false);
         taskLocalVariables.put(ActivitiType.SKIP_EXPRESSION, false);
         taskLocalVariables.put(ActivitiType.REJECT_REASON, reason);
-        ProcessTaskVo nextTask = this.completeTaskByTaskID(currentTaskId, processVariables, taskLocalVariables);
+        List<ProcessTaskVo> nextTask = this.completeTaskByTaskID(currentTaskId, processVariables, taskLocalVariables);
         // 清空临时转向信息
         currentActivity.getOutgoingTransitions().clear();
         // 恢复原来的走向
@@ -306,4 +336,5 @@ public class ProcessTaskServiceImpl implements ProcessTaskService{
         // 返回下个任务的任务
 		return nextTask;
 	}
+	
 }

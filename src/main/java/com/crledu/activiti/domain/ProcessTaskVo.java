@@ -21,6 +21,8 @@ public class ProcessTaskVo {
 
 	private Date endTime;
 
+	private Date beginTime;
+	
 	private String description;
 
 	private String formData;

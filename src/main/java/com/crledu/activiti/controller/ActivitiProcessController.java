@@ -127,7 +127,7 @@ public class ActivitiProcessController {
 	/**
 	 * 
 	 ******************************************
-	 * @Function: 启动流程实例
+	 * @Function: 启动流程实例	
 	 * @param ProDefKey
 	 *            流程定义key
 	 * @return String
@@ -259,16 +259,16 @@ public class ActivitiProcessController {
 	 *
 	 */
 	@RequestMapping(value = "task/{id}/complete", method = RequestMethod.POST)
-	public Response<ProcessTaskVo> completeTask(@PathVariable("id") String taskId, ProcessTaskSelector taskCondition) {
+	public Response<List<ProcessTaskVo>> completeTask(@PathVariable("id") String taskId, ProcessTaskSelector taskCondition) {
 		Map<String, Object> processVariables = new HashMap<String, Object>();  //流程变量
 		Map<String, Object> taskLocalVariables = new HashMap<String, Object>(); // 任务变量
 		taskLocalVariables.put("userId", taskCondition.getAssignee());
 		taskLocalVariables.put("currentAccount", taskCondition.getCurrentAccount());
 		taskLocalVariables.put("group", taskCondition.getGroup());
 		taskLocalVariables.put("results", "1");
-		ProcessTaskVo nextTask = processTaskService.completeTaskByTaskID(taskId, processVariables, taskLocalVariables);
+		List<ProcessTaskVo> nextTask = processTaskService.completeTaskByTaskID(taskId, processVariables, taskLocalVariables);
 		if (nextTask != null) {
-			return new Response<ProcessTaskVo>().success(nextTask);
+			return new Response<List<ProcessTaskVo>>().success(nextTask);
 		}
 		return new Response<String>().failure("任务完成出错");
 	}
@@ -291,10 +291,10 @@ public class ActivitiProcessController {
 	 *
 	 */
 	@RequestMapping(value = "task/{id}/reject", method = RequestMethod.POST)
-	public Response<ProcessTaskVo> rejectTask(@PathVariable("id") String currentTaskId,String destinationTaskId,String reason) {
-		ProcessTaskVo nextTask = processTaskService.rejectTask(currentTaskId, destinationTaskId, reason);
+	public Response<List<ProcessTaskVo>> rejectTask(@PathVariable("id") String currentTaskId,String destinationTaskId,String reason) {
+		List<ProcessTaskVo> nextTask = processTaskService.rejectTask(currentTaskId, destinationTaskId, reason);
 		if (nextTask != null) {
-			return new Response<ProcessTaskVo>().success(nextTask);
+			return new Response<List<ProcessTaskVo>>().success(nextTask);
 		}
 		return new Response<String>().failure("任务驳回出错");
 	}
