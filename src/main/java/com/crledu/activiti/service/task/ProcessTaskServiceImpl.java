@@ -195,18 +195,19 @@ public class ProcessTaskServiceImpl implements ProcessTaskService{
 	}
 
 	@Override
-	public String completeTaskByTaskID(String currentTaskID, Map<String, Object> processVariables, Map<String, Object> taskLocalVariables) {
+	public ProcessTaskVo completeTaskByTaskID(String currentTaskID, Map<String, Object> processVariables, Map<String, Object> taskLocalVariables) {
 		Task task = taskService.createTaskQuery().taskId(currentTaskID).singleResult(); // 获取当前任务
 		if (task.getAssignee() == null || task.getAssignee().trim().isEmpty()) { // 判断任务是否有直接委派人
 			taskService.setAssignee(currentTaskID, "yhy"); // taskLocalVariables.get("currentAccount");，否则添加当前登录账号为直接委派人
 		}
 		taskService.complete(currentTaskID, taskLocalVariables); // 通过任务ID，完成任务
 		Task nextTask = taskService.createTaskQuery().processInstanceId(task.getProcessInstanceId()).singleResult(); // 获取当前任务
-		return nextTask.getId();
+		ProcessTaskVo taskVo = new ProcessTaskVo(nextTask);
+		return taskVo;
 	}
 
 	@Override
-	public String rejectTask(String currentTaskId, String destinationTaskId, String reason) {
+	public ProcessTaskVo rejectTask(String currentTaskId, String destinationTaskId, String reason) {
 		// 获取目标任务信息
 		HistoricTaskInstance hisDestTask = historyService
 				.createHistoricTaskInstanceQuery()
@@ -291,7 +292,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService{
         processVariables.put(ActivitiType.SKIP_EXPRESSION, false);
         taskLocalVariables.put(ActivitiType.SKIP_EXPRESSION, false);
         taskLocalVariables.put(ActivitiType.REJECT_REASON, reason);
-        String nextTaskId = this.completeTaskByTaskID(currentTaskId, processVariables, taskLocalVariables);
+        ProcessTaskVo nextTask = this.completeTaskByTaskID(currentTaskId, processVariables, taskLocalVariables);
         // 清空临时转向信息
         currentActivity.getOutgoingTransitions().clear();
         // 恢复原来的走向
@@ -303,6 +304,6 @@ public class ProcessTaskServiceImpl implements ProcessTaskService{
         // 通过实例删除所有历史节点，恢复目标节点以前的历史节点
         processEngine.getManagementService().executeCommand(new RejectActivityCMD(instanceId, oldHisActivityList));
         // 返回下个任务的任务
-		return nextTaskId;
+		return nextTask;
 	}
 }

@@ -17,7 +17,7 @@ public interface ProcessTaskService {
 
 	boolean completeTask(String taskId, ProcessTaskSelector taskCondition);
 
-	String completeTaskByTaskID(String currentTaskID,
+	ProcessTaskVo completeTaskByTaskID(String currentTaskID,
 			Map<String, Object> processVariables,
 			Map<String, Object> taskLocalVariables);
 	
@@ -38,6 +38,6 @@ public interface ProcessTaskService {
 	 ******************************************
 	 *
 	 */
-	String rejectTask(String currentTaskId, String destinationTaskId, String reason);
+	ProcessTaskVo rejectTask(String currentTaskId, String destinationTaskId, String reason);
 
 }
