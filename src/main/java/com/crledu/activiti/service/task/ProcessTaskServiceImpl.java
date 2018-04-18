@@ -23,6 +23,7 @@ import org.activiti.engine.task.IdentityLink;
 import org.activiti.engine.task.Task;
 import org.activiti.engine.task.TaskQuery;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.crledu.activiti.domain.ProcessTaskSelector;
 import com.crledu.activiti.domain.ProcessTaskVo;
@@ -46,6 +47,7 @@ import com.crledu.system.response.page.PageResponse;
  ************************************************************
 **/
 @Service
+@Transactional
 public class ProcessTaskServiceImpl implements ProcessTaskService{
 	
 	/**
@@ -72,6 +74,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService{
 //		TaskService taskService = processEngine.getTaskService();  
 		TaskQuery taskQuery = taskService.createTaskQuery();  // 获取任务查询
 		List<Task> taskList = new ArrayList<>();  // 记录查询的结果
+		taskQuery = taskQuery.orderByTaskCreateTime().desc();
 		if (selector != null) {
 			String condition = selector.getProcessInstanceId();
 			if (condition != null && !condition.trim().isEmpty()) {
@@ -102,6 +105,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService{
 		}
 		List<ProcessTaskVo> taskVoList = new ArrayList<>(); 
 		for (Task task : taskList) {  // 转化为值对象
+			StringBuilder sb2 = new StringBuilder();
 			if (task.getAssignee() == null || task.getAssignee().trim().isEmpty()) {
 				List<IdentityLink> candidate = taskService.getIdentityLinksForTask(task.getId());
 				StringBuilder sb = new StringBuilder();
@@ -109,10 +113,14 @@ public class ProcessTaskServiceImpl implements ProcessTaskService{
 					if (identityLink.getUserId() != null) {
 						sb.append(identityLink.getUserId()+",");
 					}
+					if (identityLink.getGroupId() != null) {
+						sb2.append(identityLink.getGroupId() + ",");
+					}
 				}
 				task.setAssignee(sb.toString());
 			}
 			ProcessTaskVo taskVo = new ProcessTaskVo(task);
+			taskVo.setGroup(sb2.toString());
 			taskVoList.add(taskVo);
 		}
 		PageResponse<ProcessTaskVo> pageResponse = new PageResponse<ProcessTaskVo>(taskVoList, taskQuery.count());
@@ -122,7 +130,12 @@ public class ProcessTaskServiceImpl implements ProcessTaskService{
 	@Override
 	public PageResponse<ProcessTaskVo> findFinishTasks(ProcessTaskSelector selector) {
 		HistoryService historyService = processEngine.getHistoryService();
-		HistoricTaskInstanceQuery hisTaskQuery = historyService.createHistoricTaskInstanceQuery().finished();  // 获取历史任务query，并添加已办条件
+		HistoricTaskInstanceQuery hisTaskQuery = historyService
+				.createHistoricTaskInstanceQuery()
+				.finished()
+				.orderByTaskCreateTime()
+				.desc();  // 获取历史任务query，并添加已办条件
+		
 		List<HistoricTaskInstance> taskList = new ArrayList<>();
 		if (selector != null) { // 判断条件实体是否为空
 			String condition = selector.getProcessInstanceId();
@@ -236,19 +249,32 @@ public class ProcessTaskServiceImpl implements ProcessTaskService{
 		return false;
 	}
 	
+	public String upTaskId (String instanceId){
+		List<HistoricTaskInstance> listTask = historyService.createHistoricTaskInstanceQuery()
+				.processInstanceId(instanceId)
+				.orderByTaskCreateTime()
+				.finished()
+				.desc()
+				.list();
+		return listTask.get(0).getId();
+	}
+	
 	@Override
 	public List<ProcessTaskVo> rejectTask(String currentTaskId, String destinationTaskId, String reason) {
-		// 获取目标任务信息
-		HistoricTaskInstance hisDestTask = historyService
-				.createHistoricTaskInstanceQuery()
-				.taskId(destinationTaskId)
-				.includeTaskLocalVariables() //包含任务变量
-				.singleResult();
 		// 获取当前任务信息
 		HistoricTaskInstance hisCurrentTask = historyService
 				.createHistoricTaskInstanceQuery()
 				.taskId(currentTaskId)
 				.includeTaskLocalVariables()
+				.singleResult();
+		if (destinationTaskId == null || destinationTaskId.trim().isEmpty()) {
+			destinationTaskId = this.upTaskId(hisCurrentTask.getProcessInstanceId());
+		}
+		// 获取目标任务信息
+		HistoricTaskInstance hisDestTask = historyService
+				.createHistoricTaskInstanceQuery()
+				.taskId(destinationTaskId)
+				.includeTaskLocalVariables() //包含任务变量
 				.singleResult();
 		
 		String instanceId = hisCurrentTask.getProcessInstanceId(); // 获取当前流程实例ID
@@ -322,6 +348,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService{
         processVariables.put(ActivitiType.SKIP_EXPRESSION, false);
         taskLocalVariables.put(ActivitiType.SKIP_EXPRESSION, false);
         taskLocalVariables.put(ActivitiType.REJECT_REASON, reason);
+        taskLocalVariables.put("userId", hisDestTask.getAssignee());
         List<ProcessTaskVo> nextTask = this.completeTaskByTaskID(currentTaskId, processVariables, taskLocalVariables);
         // 清空临时转向信息
         currentActivity.getOutgoingTransitions().clear();

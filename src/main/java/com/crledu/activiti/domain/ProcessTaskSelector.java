@@ -1,8 +1,10 @@
 package com.crledu.activiti.domain;
 
+import java.io.Serializable;
+
 import com.crledu.system.response.page.PageInfo;
 
-public class ProcessTaskSelector extends PageInfo {
+public class ProcessTaskSelector extends PageInfo implements Serializable{
 	/**
 	 * 当前登录账号
 	 */
@@ -20,6 +22,11 @@ public class ProcessTaskSelector extends PageInfo {
 	 * 角色
 	 */
 	private String group;
+	
+	/**
+	 * 决定任务流向
+	 */
+	private boolean result;
 
 	public ProcessTaskSelector() {
 		super();
@@ -62,8 +69,16 @@ public class ProcessTaskSelector extends PageInfo {
 	public void setGroup(String group) {
 		this.group = group;
 	}
+	
+	public boolean getResult() {
+		return result;
+	}
 
-	@Override
+	public void setResult(boolean result) {
+		this.result = result;
+	}
+
+	@Override	
 	public String toString() {
 		return "ProcessTaskSelector [currentAccount=" + currentAccount
 				+ ", processInstanceId=" + processInstanceId + ", assignee="

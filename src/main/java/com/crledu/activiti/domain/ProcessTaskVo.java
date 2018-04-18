@@ -1,11 +1,12 @@
 package com.crledu.activiti.domain;
 
+import java.io.Serializable;
 import java.util.Date;
 
 import org.activiti.engine.history.HistoricTaskInstance;
 import org.activiti.engine.task.Task;
 
-public class ProcessTaskVo {
+public class ProcessTaskVo implements Serializable{
 
 	private String taskID;
 
@@ -26,6 +27,8 @@ public class ProcessTaskVo {
 	private String description;
 
 	private String formData;
+	
+	private String group;
 
 	public ProcessTaskVo() {
 		super();
@@ -41,6 +44,7 @@ public class ProcessTaskVo {
 		this.category = task.getCategory();
 		this.description = task.getDescription();
 		this.formData = task.getFormKey();
+		this.setBeginTime(task.getCreateTime());
 	}
 
 	public ProcessTaskVo(HistoricTaskInstance task) {
@@ -54,6 +58,7 @@ public class ProcessTaskVo {
 		this.category = task.getCategory();
 		this.description = task.getDescription();
 		this.formData = task.getFormKey();
+		this.beginTime = task.getStartTime();
 	}
 
 	public String getTaskID() {
@@ -126,6 +131,22 @@ public class ProcessTaskVo {
 
 	public void setFormData(String formData) {
 		this.formData = formData;
+	}
+	
+	public Date getBeginTime() {
+		return beginTime;
+	}
+
+	public void setBeginTime(Date beginTime) {
+		this.beginTime = beginTime;
+	}
+
+	public String getGroup() {
+		return group;
+	}
+
+	public void setGroup(String group) {
+		this.group = group;
 	}
 
 	@Override

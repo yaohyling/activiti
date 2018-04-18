@@ -193,6 +193,7 @@ public class ActivitiProcessController {
 	@RequestMapping("task/todo/list")
 	public Response<PageResponse<ProcessTaskVo>> findToDoTasks(ProcessTaskSelector selector) {
 		PageResponse<ProcessTaskVo> taskVoList = processTaskService.findToDoTasks(selector);
+		System.out.println(selector.getProcessInstanceId());
 		return new Response<PageResponse<ProcessTaskVo>>().success(taskVoList);
 	}
 	
@@ -265,7 +266,7 @@ public class ActivitiProcessController {
 		taskLocalVariables.put("userId", taskCondition.getAssignee());
 		taskLocalVariables.put("currentAccount", taskCondition.getCurrentAccount());
 		taskLocalVariables.put("group", taskCondition.getGroup());
-		taskLocalVariables.put("results", "1");
+		taskLocalVariables.put("result", taskCondition.getResult());
 		List<ProcessTaskVo> nextTask = processTaskService.completeTaskByTaskID(taskId, processVariables, taskLocalVariables);
 		if (nextTask != null) {
 			return new Response<List<ProcessTaskVo>>().success(nextTask);

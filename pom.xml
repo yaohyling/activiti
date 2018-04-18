@@ -20,17 +20,17 @@
 			<artifactId>activiti-spring-boot-starter-basic</artifactId>
 			<version>${activiti.version}</version>
 		</dependency>
-		
-		<!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-web -->
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-web</artifactId>
-		</dependency>
 		<!-- https://mvnrepository.com/artifact/org.activiti/activiti-modeler -->
 		<dependency>
 			<groupId>org.activiti</groupId>
 			<artifactId>activiti-modeler</artifactId>
 			<version>${activiti.version}</version>
+		</dependency>
+		
+		<!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-web -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-test -->
 		<dependency>
