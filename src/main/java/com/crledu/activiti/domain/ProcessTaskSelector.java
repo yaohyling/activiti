@@ -2,12 +2,15 @@ package com.crledu.activiti.domain;
 
 import java.io.Serializable;
 
+import javax.validation.constraints.NotNull;
+
 import com.crledu.system.response.page.PageInfo;
 
 public class ProcessTaskSelector extends PageInfo implements Serializable{
 	/**
 	 * 当前登录账号
 	 */
+	@NotNull
 	private String currentAccount;
 	/**
 	 * 实例ID

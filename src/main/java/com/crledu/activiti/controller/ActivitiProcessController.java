@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.Resource;
+import javax.validation.Valid;
 
 import org.activiti.bpmn.converter.BpmnXMLConverter;
 import org.activiti.bpmn.model.BpmnModel;
@@ -260,7 +261,7 @@ public class ActivitiProcessController {
 	 *
 	 */
 	@RequestMapping(value = "task/{id}/complete", method = RequestMethod.POST)
-	public Response<List<ProcessTaskVo>> completeTask(@PathVariable("id") String taskId, ProcessTaskSelector taskCondition) {
+	public Response<List<ProcessTaskVo>> completeTask(@PathVariable("id") String taskId,@Valid ProcessTaskSelector taskCondition) {
 		Map<String, Object> processVariables = new HashMap<String, Object>();  //流程变量
 		Map<String, Object> taskLocalVariables = new HashMap<String, Object>(); // 任务变量
 		taskLocalVariables.put("userId", taskCondition.getAssignee());

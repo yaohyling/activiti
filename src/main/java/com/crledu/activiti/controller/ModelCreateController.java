@@ -19,9 +19,22 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 public class ModelCreateController {
 	
 	/**
-	 * 创建模型
+	 * 
+	 ******************************************
+	 * @Function: 创建模型  由activiti 源码修改
+	 * @param modelName 
+	 * @param modelKey
+	 * @param description
 	 * @param request
 	 * @param response
+	 * void
+	 ******************************************
+	 * @CreatedBy: yhy on 2018年4月19日上午10:02:11
+	 ******************************************
+	 * @ModifiedBy: [name] on [time] 
+	 * @Description:
+	 ******************************************
+	 *
 	 */
 	@RequestMapping("/create")
 	public void create(String modelName,String modelKey, String description,HttpServletRequest request, HttpServletResponse response) {

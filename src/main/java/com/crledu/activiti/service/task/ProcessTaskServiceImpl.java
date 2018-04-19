@@ -210,8 +210,12 @@ public class ProcessTaskServiceImpl implements ProcessTaskService{
 	@Override
 	public List<ProcessTaskVo> completeTaskByTaskID(String currentTaskID, Map<String, Object> processVariables, Map<String, Object> taskLocalVariables) {
 		Task task = taskService.createTaskQuery().taskId(currentTaskID).singleResult(); // 获取当前任务
+		if (task == null) {
+			return null;
+		}
 		if (task.getAssignee() == null || task.getAssignee().trim().isEmpty()) { // 判断任务是否有直接委派人
-			taskService.setAssignee(currentTaskID, "yhy"); // taskLocalVariables.get("currentAccount");，否则添加当前登录账号为直接委派人
+			
+			taskService.setAssignee(currentTaskID, taskLocalVariables.get("currentAccount").toString()); // taskLocalVariables.get("currentAccount");，否则添加当前登录账号为直接委派人
 		}
 		taskService.complete(currentTaskID, taskLocalVariables); // 通过任务ID，完成任务
 		List<Task> nextTask = taskService.createTaskQuery().processInstanceId(task.getProcessInstanceId()).list(); // 获取当前任务
@@ -249,6 +253,21 @@ public class ProcessTaskServiceImpl implements ProcessTaskService{
 		return false;
 	}
 	
+	/**
+	 * 
+	 ******************************************
+	 * @Function: 获取上一任务ID
+	 * @param instanceId  实例ID
+	 * @return
+	 * String
+	 ******************************************
+	 * @CreatedBy: yhy on 2018年4月19日上午10:05:15
+	 ******************************************
+	 * @ModifiedBy: [name] on [time] 
+	 * @Description:
+	 ******************************************
+	 *
+	 */
 	public String upTaskId (String instanceId){
 		List<HistoricTaskInstance> listTask = historyService.createHistoricTaskInstanceQuery()
 				.processInstanceId(instanceId)
@@ -267,8 +286,9 @@ public class ProcessTaskServiceImpl implements ProcessTaskService{
 				.taskId(currentTaskId)
 				.includeTaskLocalVariables()
 				.singleResult();
+		// 判断目标任务ID是否为空
 		if (destinationTaskId == null || destinationTaskId.trim().isEmpty()) {
-			destinationTaskId = this.upTaskId(hisCurrentTask.getProcessInstanceId());
+			destinationTaskId = this.upTaskId(hisCurrentTask.getProcessInstanceId());  //设置目标任务ID为  上一任务ID
 		}
 		// 获取目标任务信息
 		HistoricTaskInstance hisDestTask = historyService
