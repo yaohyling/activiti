@@ -16,6 +16,7 @@ import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.editor.language.json.converter.BpmnJsonConverter;
 import org.activiti.engine.ProcessEngine;
 import org.activiti.engine.RepositoryService;
+import org.activiti.engine.RuntimeService;
 import org.activiti.engine.repository.Deployment;
 import org.activiti.engine.repository.Model;
 import org.slf4j.Logger;
@@ -56,7 +57,7 @@ public class ActivitiProcessController {
 	
 	@Resource
 	private ProcessTaskService processTaskService;
-
+	
 	/**
 	 * 
 	 ******************************************
@@ -119,8 +120,7 @@ public class ActivitiProcessController {
 	 *
 	 */
 	@RequestMapping("def/list")
-	public Response<List<ProcessDefinitionVo>> findDeploy(
-			ProcessDefSelector selector) {
+	public Response<List<ProcessDefinitionVo>> findDeploy(ProcessDefSelector selector) {
 		List<ProcessDefinitionVo> list = processDefService.findDeployBySelector(selector);
 		return new Response<List<ProcessDefinitionVo>>().success(list);
 	}
@@ -143,7 +143,13 @@ public class ActivitiProcessController {
 	@RequestMapping("{key}/start")
 	public Response<ProcessInstancessVo> startProcess(@PathVariable("key") String proDefKey, String currentAccount) {
 		Map<String, Object> variables = new HashMap<String, Object>();
-		variables.put("userId", currentAccount);
+		Long id = 104L;
+		variables.put("group", id.toString());
+		List<String> assigneeList = new ArrayList<String>();
+		assigneeList.add("qq");
+		assigneeList.add("ww");
+		variables.put("multiAssignees", assigneeList);
+		variables.put("multiCount", assigneeList.size());
 		ProcessInstancessVo instanceVo = processInsService.startInstanceByKey(proDefKey, variables);
 		if (instanceVo != null) {
 			return new Response<ProcessInstancessVo>().success(instanceVo);
@@ -264,15 +270,27 @@ public class ActivitiProcessController {
 	public Response<List<ProcessTaskVo>> completeTask(@PathVariable("id") String taskId,@Valid ProcessTaskSelector taskCondition) {
 		Map<String, Object> processVariables = new HashMap<String, Object>();  //流程变量
 		Map<String, Object> taskLocalVariables = new HashMap<String, Object>(); // 任务变量
-		taskLocalVariables.put("userId", taskCondition.getAssignee());
-		taskLocalVariables.put("currentAccount", taskCondition.getCurrentAccount());
-		taskLocalVariables.put("group", taskCondition.getGroup());
-		taskLocalVariables.put("result", taskCondition.getResult());
+//		taskLocalVariables.put("userId", taskCondition.getAssignee());
+		taskLocalVariables.put("currentAccount", "yaohy");
+		taskLocalVariables.put("group", "fx");
+		taskLocalVariables.put("upGroup", "fxfx");
+//		taskLocalVariables.put("result", taskCondition.getResult());
+		taskLocalVariables.put("checkTime", "2018-7-24T16:08");
+		taskLocalVariables.put("stage", "true");
+		taskLocalVariables.put("function", "true");
 		List<ProcessTaskVo> nextTask = processTaskService.completeTaskByTaskID(taskId, processVariables, taskLocalVariables);
 		if (nextTask != null) {
 			return new Response<List<ProcessTaskVo>>().success(nextTask);
 		}
 		return new Response<String>().failure("任务完成出错");
+	}
+	
+	@RequestMapping(value = "instance/{id}/end", method = RequestMethod.POST)
+	public Response<List<ProcessTaskVo>> completeTask(@PathVariable("id") String instanceId) {
+		RuntimeService runtimeService = processEngine.getRuntimeService();
+//		runtimeService.suspendProcessInstanceById(instanceId);
+		runtimeService.deleteProcessInstance(instanceId, "");
+		return new Response<String>().success();
 	}
 	
 	/**

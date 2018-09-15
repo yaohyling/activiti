@@ -1,5 +1,8 @@
 package com.crledu.activiti.controller;
 
+import java.io.BufferedOutputStream;
+
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -8,6 +11,7 @@ import org.activiti.engine.ProcessEngine;
 import org.activiti.engine.ProcessEngines;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.repository.Model;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -17,6 +21,9 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 @RestController
 @RequestMapping("/model")
 public class ModelCreateController {
+	
+	@Resource
+	private RepositoryService repositoryService;
 	
 	/**
 	 * 
@@ -65,6 +72,36 @@ public class ModelCreateController {
 			response.sendRedirect(request.getContextPath() + "/modeler.html?modelId=" + modelData.getId());
 		} catch (Exception e) {
 			System.out.println("异常");
+		}
+	}
+	@GetMapping("xml")
+	public void downLoadXML(String id,HttpServletResponse response){
+		BufferedOutputStream bos = null;
+		try {
+		 
+			try {
+				Model modelData = repositoryService.getModel(id);
+		 
+				byte[] bpmnBytes = repositoryService
+						.getModelEditorSource(modelData.getId());
+				// 封装输出流
+				bos = new BufferedOutputStream(response.getOutputStream());
+				bos.write(bpmnBytes);// 写入流
+		 
+				String filename = modelData.getId() + ".bpmn20.xml";
+				response.setContentType("application/x-msdownload;");
+				response.setHeader("Content-Disposition",
+						"attachment; filename=" + filename);
+				response.flushBuffer();
+		 
+			} finally {
+				bos.flush();
+				bos.close();
+			}
+		 
+		} catch (Exception e) {
+			System.out.println("流程部署失败");
+			e.printStackTrace();
 		}
 	}
 }

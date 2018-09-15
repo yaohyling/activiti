@@ -70,11 +70,12 @@ public class ProcessTaskServiceImpl implements ProcessTaskService{
 	
 	@Override
 	public PageResponse<ProcessTaskVo> findToDoTasks(ProcessTaskSelector selector) {
+//		taskService.setVariableLocal("14", "抄送人", "yhy,zmz,cheg");
 //		/* 通过注入的方式获取*/
 //		TaskService taskService = processEngine.getTaskService();  
 		TaskQuery taskQuery = taskService.createTaskQuery();  // 获取任务查询
 		List<Task> taskList = new ArrayList<>();  // 记录查询的结果
-		taskQuery = taskQuery.orderByTaskCreateTime().desc();
+		taskQuery = taskQuery.includeProcessVariables().includeTaskLocalVariables().orderByTaskCreateTime().desc();
 		if (selector != null) {
 			String condition = selector.getProcessInstanceId();
 			if (condition != null && !condition.trim().isEmpty()) {
@@ -105,6 +106,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService{
 		}
 		List<ProcessTaskVo> taskVoList = new ArrayList<>(); 
 		for (Task task : taskList) {  // 转化为值对象
+//			Map<String, Object> XX = task.getTaskLocalVariables();
 			StringBuilder sb2 = new StringBuilder();
 			if (task.getAssignee() == null || task.getAssignee().trim().isEmpty()) {
 				List<IdentityLink> candidate = taskService.getIdentityLinksForTask(task.getId());
@@ -214,7 +216,6 @@ public class ProcessTaskServiceImpl implements ProcessTaskService{
 			return null;
 		}
 		if (task.getAssignee() == null || task.getAssignee().trim().isEmpty()) { // 判断任务是否有直接委派人
-			
 			taskService.setAssignee(currentTaskID, taskLocalVariables.get("currentAccount").toString()); // taskLocalVariables.get("currentAccount");，否则添加当前登录账号为直接委派人
 		}
 		taskService.complete(currentTaskID, taskLocalVariables); // 通过任务ID，完成任务
