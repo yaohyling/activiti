@@ -150,7 +150,9 @@ public class ActivitiProcessController {
 		assigneeList.add("ww");
 		variables.put("multiAssignees", assigneeList);
 		variables.put("multiCount", assigneeList.size());
+		variables.put("specialAss", "yaohy");
 		ProcessInstancessVo instanceVo = processInsService.startInstanceByKey(proDefKey, variables);
+		processEngine.getRuntimeService().setVariable(instanceVo.getProcessInstanceId(), "specialAss", "yaohy");
 		if (instanceVo != null) {
 			return new Response<ProcessInstancessVo>().success(instanceVo);
 		}
@@ -277,7 +279,32 @@ public class ActivitiProcessController {
 //		taskLocalVariables.put("result", taskCondition.getResult());
 		taskLocalVariables.put("checkTime", "2018-7-24T16:08");
 		taskLocalVariables.put("stage", "true");
+		List<String> emails = new ArrayList<String>();
+		emails.add("1570770826@qq.com");
+		emails.add("1057696018@qq.com");
+		taskLocalVariables.put("emails", emails);
+		taskLocalVariables.put("email", "1570770826@qq.com");
 		taskLocalVariables.put("function", "true");
+		taskLocalVariables.put("progress", "0.1");
+		List<ProcessTaskVo> nextTask = processTaskService.completeTaskByTaskID(taskId, processVariables, taskLocalVariables);
+		if (nextTask != null) {
+			return new Response<List<ProcessTaskVo>>().success(nextTask);
+		}
+		return new Response<String>().failure("任务完成出错");
+	}
+	@RequestMapping(value = "task/{id}/complete2", method = RequestMethod.POST)
+	public Response<List<ProcessTaskVo>> completeTask2(@PathVariable("id") String taskId,@Valid ProcessTaskSelector taskCondition) {
+		Map<String, Object> processVariables = new HashMap<String, Object>();  //流程变量
+		Map<String, Object> taskLocalVariables = new HashMap<String, Object>(); // 任务变量
+//		taskLocalVariables.put("userId", taskCondition.getAssignee());
+		taskLocalVariables.put("currentAccount", "yaohy");
+		taskLocalVariables.put("group", "fx");
+		taskLocalVariables.put("upGroup", "fxfx");
+//		taskLocalVariables.put("result", taskCondition.getResult());
+		taskLocalVariables.put("checkTime", "2018-7-24T16:08");
+		taskLocalVariables.put("stage", "true");
+		taskLocalVariables.put("function", "true");
+		taskLocalVariables.put("progress", "1");
 		List<ProcessTaskVo> nextTask = processTaskService.completeTaskByTaskID(taskId, processVariables, taskLocalVariables);
 		if (nextTask != null) {
 			return new Response<List<ProcessTaskVo>>().success(nextTask);
